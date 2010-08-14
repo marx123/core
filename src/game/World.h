@@ -77,8 +77,9 @@ enum WorldTimers
     WUPDATE_UPTIME      = 4,
     WUPDATE_CORPSES     = 5,
     WUPDATE_EVENTS      = 6,
-    WUPDATE_DELETECHARS = 7,
-    WUPDATE_COUNT       = 8
+    WUPDATE_BROADCAST   = 7,
+    WUPDATE_COUNT       = 8,
+    WUPDATE_DELETECHARS = 9
 };
 
 /// Configuration elements
@@ -182,6 +183,9 @@ enum eConfigUInt32Values
     CONFIG_UINT32_CHARDELETE_KEEP_DAYS,
     CONFIG_UINT32_CHARDELETE_METHOD,
     CONFIG_UINT32_CHARDELETE_MIN_LEVEL,
+    /* Broadcaster */
+    CONFIG_UINT32_BROADCAST_INTERVAL,  
+    CONFIG_UINT32_BROADCAST_POSITION,
     /* Start AHBot */
     CONFIG_UINT32_AHBOT_ITEMS_CYCLE,
     CONFIG_UINT32_AHBOT_ITEM_MIN_ITEM_LEVEL,
@@ -359,6 +363,8 @@ enum eConfigBoolValues
     CONFIG_BOOL_VALUE_COUNT,
     
     /// Darkrulerz' Customs
+    // Broadcaster
+    CONFIG_BOOL_BROADCAST_ENABLED,
     // PvP Token
     CONFIG_BOOL_PVP_TOKEN_ENABLE,
     // PvP Announcer
@@ -434,6 +440,13 @@ enum RealmZone
     REALM_ZONE_CN2_6_9       = 35,                          // basic-Latin at create, any at login
     REALM_ZONE_CN3_7         = 36,                          // basic-Latin at create, any at login
     REALM_ZONE_CN5_8         = 37                           // basic-Latin at create, any at login
+};
+
+enum BroadcastLocation
+{
+    BROADCAST_LOCATION_CHAT = 1,
+    BROADCAST_LOCATION_TOP = 2,
+    BROADCAST_LOCATION_IRC = 4,
 };
 
 // DB scripting commands
@@ -743,6 +756,10 @@ class World
         std::string m_DBVersion;
         std::string m_CreatureEventAIVersion;
         std::string m_ScriptsVersion;
+        
+        //Broadcaster
+        uint32 m_nextId;
+        void SendBroadcast();
 
         //Added By AHBot
         std::string m_AHBotName;
