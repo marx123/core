@@ -21722,6 +21722,42 @@ void Player::UpdateFallInformationIfNeed( MovementInfo const& minfo,uint16 opcod
         SetFallInformation(minfo.GetFallTime(), minfo.GetPos()->z);
 }
 
+///PVP Token
+void Player::ReceiveToken()
+{
+    if(!sWorld.getConfig(CONFIG_BOOL_PVP_TOKEN_ENABLE))
+        return;
+
+    uint8 MapRestriction = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_RESTRICTION);
+
+    if( MapRestriction == 1 && !InBattleGround() && !HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP) ||
+        MapRestriction == 2 && !HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP) ||
+        MapRestriction == 3 && !InBattleGround())
+        return;
+
+    uint32 itemID = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMID);
+    uint32 itemCount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT);
+    uint32 goldAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD);
+
+    ItemPosCountVec dest;
+    uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemID, itemCount);
+    if( msg != EQUIP_ERR_OK )   // convert to possible store amount
+    {
+        SendEquipError( msg, NULL, NULL );
+        return;
+    }
+
+    Item* item = StoreNewItem( dest, itemID, true, Item::GenerateItemRandomPropertyId(itemID));
+    SendNewItem(item,itemCount,true,false);
+
+    if( goldAmount > 0 )
+        ModifyMoney(goldAmount);
+        SaveGoldToDB();
+        return;
+
+    ChatHandler(this).PSendSysMessage(LANG_EVENTMESSAGE);
+}
+
 void Player::UnsummonPetTemporaryIfAny()
 {
     Pet* pet = GetPet();
