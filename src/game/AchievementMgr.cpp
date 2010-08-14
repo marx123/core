@@ -100,6 +100,8 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:
             break;
         default:
+            if (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY)
+            break;
             sLog.outErrorDb( "Table `achievement_criteria_requirement` have data for not supported criteria type (Entry: %u Type: %u), ignore.", criteria->ID, criteria->requiredType);
             return false;
     }
@@ -876,28 +878,30 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     // some hardcoded requirements
                     switch(achievementCriteria->referredAchievement)
                     {
-                        case 214:              // EY, win under 6 minutes
-                        case 226:              // AV, win under 6 minutes
-                        case 159:              // AB, win under 6 minutes
+                        case 214:							// EY, win under 6 minutes
+                        case 226:							// AV, win under 6 minutes
+                        case 159:							// AB, win under 6 minutes
                         {
                             // set 8 minutes because there is 2 minutes long preparation
                             if(GetPlayer()->GetBattleGround()->GetStartTime() > (8 * MINUTE * IN_MILLISECONDS))
-                                continue;     
+                                continue;
+                            
                             break;
                         }
-                        case 201:              // WS, win under 7 minutes
+                        case 201:							// WS, win under 7 minutes
                         {
                             // set 9 minutes because there is 2 minutes long preparation
                             if(GetPlayer()->GetBattleGround()->GetStartTime() > (9 * MINUTE * IN_MILLISECONDS))
                                 continue;
+                            
                             break;
                         }
                         default:
                         {
-                            // those requirements couldn't be found in the dbc
-                            AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                            if (!data || !data->Meets(GetPlayer(),unit))
-                                continue;
+                    // those requirements couldn't be found in the dbc
+                    AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                    if (!data || !data->Meets(GetPlayer(),unit))
+                        continue;
                             break;
                         }
                     }
@@ -1324,6 +1328,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 // AchievementMgr::UpdateAchievementCriteria might also be called on login - skip in this case
                 if(!miscvalue1)
                     continue;
+                if(AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria))
+                {
+                    if(!data->Meets(GetPlayer(),unit))
+                        continue;
+                }
+
                 if(achievementCriteria->use_item.itemID != miscvalue1)
                     continue;
                 change = 1;
@@ -1719,13 +1729,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     }
                     case 122:                           // AB, assault a base
                     {
-                        error_log("ide tedy 1");
                         if(bg->GetTypeID() != BATTLEGROUND_AB)
                             continue;
                         
                         if(miscvalue2 == 1)
                             continue;
-                        error_log("ide tedy 2");
 
                         break;
                     }
@@ -1739,16 +1747,36 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
                         break;
                     }
-                    case 61:							// AV, assault a tower
+                    case 61:                            // AV, assault a tower
+                    {                   
+                        if(miscvalue2 != 0)
+                            continue;
+                        break;
+                    }
                     case 63:	                        // AV, take a graveyard
+                    {                   
+                        if(miscvalue2 != 1)
+                            continue;
+                        break;
+                    }
                     case 64:	                        // AV, defend a tower
+                    {                   
+                        if(miscvalue2 != 2)
+                            continue;
+                        break;
+                    }
                     case 65:	                        // AV, defend a graveyard
-                        continue;
+                    {                   
+                        if(miscvalue2 != 3)
+                            continue;
+                        break;
+                    }
 
                 }
                 SetCriteriaProgress(achievementCriteria, achievement, miscvalue1, PROGRESS_ACCUMULATE);
                 break;
-            }           
+            }
+
             // std case: not exist in DBC, not triggered in code as result
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_SPELLPOWER:
