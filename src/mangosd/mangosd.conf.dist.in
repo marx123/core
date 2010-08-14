@@ -1696,3 +1696,17 @@ PvPToken.ItemID = 29434
 PvPToken.ItemCount = 1
 PvPToken.Gold = 100000
 PvPToken.MapRestriction = 4
+
+###################################################################################################################
+#    PvP Announcer System
+#
+#    PvPAnnouncer.Enable
+#       Enable/disable PvP Announcer system.
+#       Default: 1 - enabled
+#                0 - disabled
+###################################################################################################################
+
+PvPAnnouncer.Enable = 1
+PvPAnnouncer.ColorKiller = |CFFFFFF01
+PvPAnnouncer.ColorKilled = |CFFFFFF01
+PvPAnnouncer.ColorArea = |CFFFE8A0E

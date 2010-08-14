@@ -63,6 +63,7 @@
 #include "Util.h"
 #include "AuctionHouseBot.h"
 #include "CharacterDatabaseCleaner.h"
+#include "Language.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -80,6 +81,23 @@ float World::m_VisibleUnitGreyDistance        = 0;
 float World::m_VisibleObjectGreyDistance      = 0;
 
 extern Config botConfig;
+
+//PVP Announcer
+void World::SendPvPAnnounce(Player* killer, Player* killed)
+{
+  std::ostringstream msg;
+  std::ostringstream KillerName;
+  std::ostringstream KilledName;
+  std::string KillerColor = sConfig.GetStringDefault("PvPAnnouncer.ColorKiller", "|CFFFFFF01");
+  std::string KilledColor = sConfig.GetStringDefault("PvPAnnouncer.ColorKilled", "|CFFFFFF01");
+  std::string AreaColor = sConfig.GetStringDefault("PvPAnnouncer.ColorArea", "|CFFFE8A0E");
+
+  KillerName << killer->GetName();
+  KilledName << killed->GetName();
+
+  msg << KillerColor << KillerName.str().c_str() << "]" << "|CFF0042FF Has Killed " << KilledColor << KilledName.str().c_str() << "]" << "|CFFE55BB0 in " << AreaColor << "[" << killer->GetBaseMap()->GetMapName() << "]";
+  SendWorldText(LANG_SYSTEMMESSAGE, msg.str().c_str());
+}
 
 /// World constructor
 World::World()
@@ -773,6 +791,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT,"PvPToken.ItemCount", 1);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD,"PvPToken.Gold", 100000);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_RESTRICTION,"PvPToken.MapRestriction", 4);
+    // PvP Announcer System
+    setConfig(CONFIG_BOOL_PVP_ANNOUNCER,"PvPAnnouncer.Enable", true);
     /// Darkrulerz' Customs
 
     if(getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT) < 1)
