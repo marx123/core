@@ -50,7 +50,7 @@ ConfVersion=2010062001
 
 RealmID = 1
 DataDir = "."
-LogsDir = ""
+LogsDir = "logs"
 LoginDatabaseInfo     = "127.0.0.1;3306;root;mangos;realmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;root;mangos;mangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;root;mangos;characters"
@@ -335,11 +335,11 @@ CleanCharacterDB = 1
 
 LogSQL = 1
 PidFile = ""
-LogLevel = 3
+LogLevel = 1
 LogTime = 0
 LogFile = "Server.log"
 LogTimestamp = 0
-LogFileLevel = 0
+LogFileLevel = 3
 LogFilter_AchievementUpdates = 1
 LogFilter_CreatureMoves = 1
 LogFilter_TransportMoves = 1
