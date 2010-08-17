@@ -131,7 +131,7 @@ bool ChatHandler::HandleAnnounceCommand(char* args)
 }
 
 // Nameannounce
-bool ChatHandler::HandleNameAnnounceCommand(const char* args)
+bool ChatHandler::HandleNameAnnounceCommand(char* args)
 {
     int32 strid = 0;
 
