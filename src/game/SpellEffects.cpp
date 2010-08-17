@@ -1788,7 +1788,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget,60934,true,NULL);
                     return;
                 }
-				case 64981:                                 //Vanquished Clutches of Yogg-Saron
+                case 64981:                                 //Vanquished Clutches of Yogg-Saron
                 { 	
                    uint32 spell_id = 0;
                    switch(irand(1,3))
@@ -3288,13 +3288,13 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
             }
         }
 
-		//Alchemist's Stone effect
-		if(m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
-		{
-			SpellAuraHolder* alcStoneEff = caster->GetSpellAuraHolder(17619);
-			if(alcStoneEff)
-				addhealth *= 1.40f;
-		}
+        //Alchemist's Stone effect
+        if(m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
+        {
+            SpellAuraHolder* alcStoneEff = caster->GetSpellAuraHolder(17619);
+            if(alcStoneEff)
+                addhealth *= 1.40f;
+        }
 
         addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
@@ -3589,17 +3589,17 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
 
     if(unitTarget->GetMaxPower(power) == 0)
         return;
-	
-	//Alechmist's Stone effect
-	if(m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
-	{
-		if(power == POWER_MANA)
-		{
-			SpellAuraHolder* alcStoneEff = caster->GetSpellAuraHolder(17619);
-			if(alcStoneEff)
-				damage *= 1.40f;
-		}
-	}
+    
+    //Alechmist's Stone effect
+    if(m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
+    {
+        if(power == POWER_MANA)
+        {
+            SpellAuraHolder* alcStoneEff = m_caster->GetSpellAuraHolder(17619);
+            if(alcStoneEff)
+                damage *= 1.40f;
+        }
+    }
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
 
@@ -6785,7 +6785,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         {
             switch(m_spellInfo->Id)
             {
-				// Raise Dead
+                // Raise Dead
                 case 46584:
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -6820,7 +6820,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // check for "Master of Ghouls", id's stored in basepoints
                     if (p_caster->HasSpell(52143))
-						p_caster->CastSpell(m_caster,52150,true);
+                        p_caster->CastSpell(m_caster,52150,true);
                     else
                         p_caster->CastSpell(m_caster,46585,true);
 

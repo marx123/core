@@ -1335,12 +1335,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 case 2820:
                 {
                     //Item - Priest T9 Healing 4P Bonus (Divine Aegis and Empowered Renew)
-					float spell_trigger_amount = triggerAmount;
-					SpellAuraHolder* setBonus = GetSpellAuraHolder(67202);
-					if(setBonus)
-						spell_trigger_amount *= 1.10f;
-					basepoints[0] = damage * spell_trigger_amount/100;
-					triggered_spell_id = 47753;
+                    float spell_trigger_amount = triggerAmount;
+                    SpellAuraHolder* setBonus = GetSpellAuraHolder(67202);
+                    if(setBonus)
+                        spell_trigger_amount *= 1.10f;
+                    basepoints[0] = damage * spell_trigger_amount/100;
+                    triggered_spell_id = 47753;
                     break;
                 }
                 // Empowered Renew
@@ -1357,10 +1357,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     int32 healingfromticks = healingAura->GetModifier()->m_amount * GetSpellAuraMaxTicks(procSpell);
 
                     //Item - Priest T9 Healing 4P Bonus (Divine Aegis and Empowered Renew)
-					float spell_trigger_amount = triggerAmount;
-					SpellAuraHolder* setBonus = GetSpellAuraHolder(67202);
-					if(setBonus)
-						spell_trigger_amount *= 1.10f;
+                    float spell_trigger_amount = triggerAmount;
+                    SpellAuraHolder* setBonus = GetSpellAuraHolder(67202);
+                    if(setBonus)
+                        spell_trigger_amount *= 1.10f;
 
                     basepoints[0] = healingfromticks * spell_trigger_amount / 100;
                     triggered_spell_id = 63544;
