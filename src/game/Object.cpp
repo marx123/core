@@ -1681,9 +1681,32 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if(GetTypeId()==TYPEID_UNIT && ((Creature*)this)->AI())
         ((Creature*)this)->AI()->JustSummoned(pCreature);
 
+    if(GetTypeId() == TYPEID_UNIT)
+        pCreature->SetCreatorGUID(GetGUID());
+
     // return the creature therewith the summoner has access to it
     return pCreature;
 }
+
+GameObject* WorldObject::SummonGameobject(uint32 id, float x, float y, float z, float angle, uint32 despwtime)
+{
+    GameObject* pGameObj = new GameObject;
+
+    Map *map = GetMap();
+
+    if(!pGameObj->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), id, map,
+    GetPhaseMask(), x, y, z, angle, 0.0f, 0.0f, 0.0f, 0.0f, 100, GO_STATE_READY))
+    {
+        delete pGameObj;
+        return NULL;
+    }
+
+    pGameObj->SetRespawnTime(despwtime/IN_MILLISECONDS);
+
+    map->Add(pGameObj);
+
+    return pGameObj;
+} 
 
 Vehicle* WorldObject::SummonVehicle(uint32 id, float x, float y, float z, float ang, uint32 vehicleId)
 {
