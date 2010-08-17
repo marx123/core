@@ -1788,6 +1788,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget,60934,true,NULL);
                     return;
                 }
+				case 64981:                                 //Vanquished Clutches of Yogg-Saron
+                { 	
+                   uint32 spell_id = 0;
+                   switch(irand(1,3))
+                    {
+                        case 1: spell_id = 64982; break;
+                        case 2: spell_id = 64983; break;
+                        case 3: spell_id = 64984; break;
+                    }
+                    m_caster->CastSpell(m_caster,spell_id,true);
+                    return; 	
+                }
                 case 67019:                                 // Flask of the North
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -3276,6 +3288,14 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
             }
         }
 
+		//Alchemist's Stone effect
+		if(m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
+		{
+			SpellAuraHolder* alcStoneEff = caster->GetSpellAuraHolder(17619);
+			if(alcStoneEff)
+				addhealth *= 1.40f;
+		}
+
         addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
@@ -3569,6 +3589,17 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
 
     if(unitTarget->GetMaxPower(power) == 0)
         return;
+	
+	//Alechmist's Stone effect
+	if(m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
+	{
+		if(power == POWER_MANA)
+		{
+			SpellAuraHolder* alcStoneEff = caster->GetSpellAuraHolder(17619);
+			if(alcStoneEff)
+				damage *= 1.40f;
+		}
+	}
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
 

@@ -1339,8 +1339,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 					SpellAuraHolder* setBonus = GetSpellAuraHolder(67202);
 					if(setBonus)
 						spell_trigger_amount *= 1.10f;
-                    basepoints[0] = damage * spell_trigger_amount/100;
-                    triggered_spell_id = 47753;
+					basepoints[0] = damage * spell_trigger_amount/100;
+					triggered_spell_id = 47753;
                     break;
                 }
                 // Empowered Renew
