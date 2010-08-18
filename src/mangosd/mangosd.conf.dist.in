@@ -50,7 +50,7 @@ ConfVersion=2010062001
 
 RealmID = 1
 DataDir = "."
-LogsDir = "logs"
+LogsDir = ""
 LoginDatabaseInfo     = "127.0.0.1;3306;root;mangos;realmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;root;mangos;mangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;root;mangos;characters"
