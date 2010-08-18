@@ -26,7 +26,6 @@
 #include "Player.h"
 #include "World.h"
 #include "ObjectMgr.h"
-#include "ObjectGuid.h"
 #include "WorldSession.h"
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
@@ -1350,9 +1349,9 @@ void WorldSession::HandleResetInstancesOpcode( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG("WORLD: CMSG_RESET_INSTANCES");
 
-    if(Group *pGroup = _player->GetGroup())
+    if (Group *pGroup = _player->GetGroup())
     {
-        if(pGroup->IsLeader(_player->GetGUID()))
+        if (pGroup->IsLeader(_player->GetObjectGuid()))
         {
             pGroup->ResetInstances(INSTANCE_RESET_ALL, false, _player);
             pGroup->ResetInstances(INSTANCE_RESET_ALL, true,_player);
@@ -1389,12 +1388,12 @@ void WorldSession::HandleSetDungeonDifficultyOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if(_player->getLevel() < LEVELREQUIREMENT_HEROIC)
+    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC)
         return;
 
-    if(Group *pGroup = _player->GetGroup())
+    if (Group *pGroup = _player->GetGroup())
     {
-        if(pGroup->IsLeader(_player->GetGUID()))
+        if (pGroup->IsLeader(_player->GetObjectGuid()))
         {
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
@@ -1433,12 +1432,12 @@ void WorldSession::HandleSetRaidDifficultyOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if(_player->getLevel() < LEVELREQUIREMENT_HEROIC)
+    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC)
         return;
 
-    if(Group *pGroup = _player->GetGroup())
+    if (Group *pGroup = _player->GetGroup())
     {
-        if(pGroup->IsLeader(_player->GetGUID()))
+        if (pGroup->IsLeader(_player->GetObjectGuid()))
         {
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
