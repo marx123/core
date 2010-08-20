@@ -4060,7 +4060,7 @@ bool ChatHandler::HandleGuildUninviteCommand(char *args)
     if (!targetGuild)
         return false;
 
-    targetGuild->DelMember (target_guid);
+    targetGuild->DelMember(target_guid);
     return true;
 }
 
@@ -4089,7 +4089,11 @@ bool ChatHandler::HandleGuildRankCommand(char *args)
     if (newrank > targetGuild->GetLowestRank ())
         return false;
 
-    targetGuild->ChangeRank (target_guid,newrank);
+    MemberSlot* slot = targetGuild->GetMemberSlot(target_guid);
+    if (!slot)
+        return false;
+
+    slot->ChangeRank(newrank);
     return true;
 }
 
