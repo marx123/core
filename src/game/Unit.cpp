@@ -41,6 +41,7 @@
 #include "Util.h"
 #include "Totem.h"
 #include "BattleGround.h"
+#include "InstanceData.h"
 #include "InstanceSaveMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -910,6 +911,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 if (((Creature*)pOwner)->AI())
                     ((Creature*)pOwner)->AI()->SummonedCreatureJustDied(cVictim);
             }
+
+            if (InstanceData* mapInstance = cVictim->GetInstanceData())
+                mapInstance->OnCreatureDeath(cVictim);
 
             // Dungeon specific stuff, only applies to players killing creatures
             if(cVictim->GetInstanceId())
@@ -5838,6 +5842,11 @@ Pet* Unit::GetPet() const
     return NULL;
 }
 
+Pet* Unit::_GetPet(ObjectGuid guid) const
+{
+    return GetMap()->GetPet(guid);
+}
+
 Unit* Unit::GetCharm() const
 {
     if (uint64 charm_guid = GetCharmGUID())
@@ -7642,6 +7651,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterCombat(enemy);
+
+        if (InstanceData* mapInstance = this->GetInstanceData())
+            mapInstance->OnCreatureEnterCombat((Creature*)this);
     }
 }
 
@@ -8512,6 +8524,10 @@ void Unit::TauntFadeOut(Unit *taunter)
     {
         if(((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterEvadeMode();
+
+        if (InstanceData* mapInstance = this->GetInstanceData())
+            mapInstance->OnCreatureEvade((Creature*)this);
+
         return;
     }
 
@@ -8607,6 +8623,9 @@ bool Unit::SelectHostileTarget()
     // enter in evade mode in other case
     if(!((Creature*)this)->isVehicle())
         ((Creature*)this)->AI()->EnterEvadeMode();
+
+    if (InstanceData* mapInstance = this->GetInstanceData())
+        mapInstance->OnCreatureEvade((Creature*)this);
 
     return false;
 }
@@ -8839,11 +8858,6 @@ void Unit::ApplyDiminishingAura( DiminishingGroup group, bool apply )
         }
         break;
     }
-}
-
-Unit* Unit::GetUnit(WorldObject const& object, uint64 guid)
-{
-    return ObjectAccessor::GetUnit(object,guid);
 }
 
 bool Unit::isVisibleForInState( Player const* u, WorldObject const* viewPoint, bool inVisibleList ) const
@@ -9838,7 +9852,7 @@ void Unit::SetFeared(bool apply, uint64 const& casterGUID, uint32 spellID, uint3
 {
     if( apply )
     {
-        if(HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
+        if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
             return;
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
@@ -9846,7 +9860,7 @@ void Unit::SetFeared(bool apply, uint64 const& casterGUID, uint32 spellID, uint3
         GetMotionMaster()->MovementExpired(false);
         CastStop(GetGUID() == casterGUID ? spellID : 0);
 
-        Unit* caster = ObjectAccessor::GetUnit(*this,casterGUID);
+        Unit* caster = IsInWorld() ?  GetMap()->GetUnit(casterGUID) : NULL;
 
         GetMotionMaster()->MoveFleeing(caster, time);       // caster==NULL processed in MoveFleeing
     }
@@ -9856,18 +9870,19 @@ void Unit::SetFeared(bool apply, uint64 const& casterGUID, uint32 spellID, uint3
 
         GetMotionMaster()->MovementExpired(false);
 
-        if( GetTypeId() != TYPEID_PLAYER && isAlive() )
+        if (GetTypeId() != TYPEID_PLAYER && isAlive())
         {
+            Creature* c = ((Creature*)this);
             // restore appropriate movement generator
-            if(getVictim())
+            if (getVictim())
                 GetMotionMaster()->MoveChase(getVictim());
             else
                 GetMotionMaster()->Initialize();
 
             // attack caster if can
-            Unit* caster = Unit::GetUnit(*this, casterGUID);
-            if(caster && ((Creature*)this)->AI())
-                ((Creature*)this)->AI()->AttackedBy(caster);
+            if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGUID) : NULL)
+                if (c->AI())
+                    c->AI()->AttackedBy(caster);
         }
     }
 
