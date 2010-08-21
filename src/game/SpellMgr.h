@@ -739,6 +739,7 @@ typedef std::pair<SpellAreaForQuestMap::const_iterator,SpellAreaForQuestMap::con
 typedef std::pair<SpellAreaForAuraMap::const_iterator, SpellAreaForAuraMap::const_iterator>  SpellAreaForAuraMapBounds;
 typedef std::pair<SpellAreaForAreaMap::const_iterator, SpellAreaForAreaMap::const_iterator>  SpellAreaForAreaMapBounds;
 
+typedef std::set<uint32> SpellDisabledSet;
 
 // Spell rank chain  (accessed using SpellMgr functions)
 struct SpellChainNode
@@ -1013,6 +1014,21 @@ class SpellMgr
 
         bool IsSkillBonusSpell(uint32 spellId) const;
 
+        bool IsSpellDisabled(uint32 spellId) const
+        {
+            return mSpellDisabledSet.find(spellId) != mSpellDisabledSet.end();
+        }
+
+        void DisableSpell(uint32 spellId)
+        {
+            mSpellDisabledSet.insert(spellId);
+        }
+
+        void EnableSpell(uint32 spellId)
+        {
+            mSpellDisabledSet.erase(spellId);
+        }
+
 
         // Spell script targets
         SpellScriptTargetBounds GetSpellScriptTargetBounds(uint32 spell_id) const
@@ -1107,6 +1123,7 @@ class SpellMgr
         void LoadPetLevelupSpellMap();
         void LoadPetDefaultSpells();
         void LoadSpellAreas();
+        void LoadDisabledSpells();
 
     private:
         bool LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefaultSpellsEntry& petDefSpells);
@@ -1132,6 +1149,7 @@ class SpellMgr
         SpellAreaForQuestMap mSpellAreaForQuestEndMap;
         SpellAreaForAuraMap  mSpellAreaForAuraMap;
         SpellAreaForAreaMap  mSpellAreaForAreaMap;
+        SpellDisabledSet     mSpellDisabledSet;
 };
 
 #define sSpellMgr SpellMgr::Instance()

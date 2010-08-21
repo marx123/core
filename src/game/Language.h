@@ -906,6 +906,11 @@ enum MangosStrings
     // Use for custom patches             11000-11999
     // Broadcaster
     LANG_AUTO_BROADCAST                 = 11000,
+    // Spell_disable
+    LANG_DISABLE_SPELL                  = 11001,
+    LANG_ENABLE_SPELL                   = 11002,
+    LANG_SPELL_DISABLED                 = 11003,
+    LANG_SPELL_ENABLED                  = 11004,
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)

@@ -530,6 +530,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_threats",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellThreatsCommand,            "", NULL },
         { "vehicle_data",                SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadVehicleDataCommand,             "", NULL },
         { "vehicle_seat_data",           SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadVehicleSeatDataCommand,         "", NULL },
+        { "spell_disabled",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellDisabledCommand,           "", NULL },
 
         { NULL,                          0,                 false, NULL,                                                     "", NULL }
     };
@@ -658,6 +659,14 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand spellCommandTable[] =
+    {
+        { "disable",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleSpellDisableCommand,        "", NULL },
+        { "enable",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleSpellEnableCommand,         "", NULL },
+        { "state",            SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleSpellStateCommand,          "", NULL },
+        { NULL,               0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
@@ -687,6 +696,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "titles",         SEC_GAMEMASTER,     false, NULL,                                           "", titlesCommandTable   },
         { "trigger",        SEC_GAMEMASTER,     false, NULL,                                           "", triggerCommandTable  },
         { "wp",             SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable       },
+        { "spell",          SEC_ADMINISTRATOR,  true,  NULL,                                           "", spellCommandTable    },
+
 
         { "aura",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuraCommand,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnAuraCommand,              "", NULL },
