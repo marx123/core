@@ -2013,6 +2013,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             // not use ammo and not allow use
                             ((Player*)target)->RemoveAmmo();
+                        return; 
+                    case 47977:                             // Magic Broom
+                        Spell::SelectMountByAreaAndSkill(target, 42680, 42683, 42667, 42668, 0);
                         return;
                     case 47190:                             // Toalu'u's Spiritual Incense
                         target->CastSpell(target, 47189, true, NULL, this);
