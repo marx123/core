@@ -826,9 +826,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"SET JUST_DIED");
-        if(!spiritOfRedemtionTalentReady)
+        if (!spiritOfRedemtionTalentReady)
             pVictim->setDeathState(JUST_DIED);
+        else
+            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"SET JUST_DIED");
 
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamageHealth1");
 
@@ -1825,8 +1826,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
                 pVictim->DealDamageMods(this,damage,NULL);
 
                 WorldPacket data(SMSG_SPELLDAMAGESHIELD,(8+8+4+4+4+4));
-                data << uint64(pVictim->GetGUID());
-                data << uint64(GetGUID());
+                data << pVictim->GetObjectGuid();
+                data << GetObjectGuid();
                 data << uint32(i_spellProto->Id);
                 data << uint32(damage);                  // Damage
                 data << uint32(0);                       // Overkill
@@ -1848,7 +1849,7 @@ void Unit::HandleEmoteCommand(uint32 emote_id)
 {
     WorldPacket data( SMSG_EMOTE, 4 + 8 );
     data << uint32(emote_id);
-    data << uint64(GetGUID());
+    data << GetObjectGuid();
     SendMessageToSet(&data, true);
 }
 
@@ -2123,6 +2124,43 @@ void Unit::CalculateAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolMask, D
                                                             // Only if roll
                 {
                     preventDeathSpell = (*i)->GetSpellProto();
+                    continue;
+                }
+                break;
+            }
+            case SPELLFAMILY_PALADIN:
+            {
+                // Ardent Defender
+                if (spellProto->SpellIconID == 2135 && GetTypeId() == TYPEID_PLAYER)
+                {
+                    int32 remainingHealth = GetHealth() - RemainingDamage;
+                    uint32 allowedHealth = GetMaxHealth() * 0.35f;
+                    // If damage kills us
+                    if (remainingHealth <= 0 && !HasAura(66233))
+                    {
+                        // Cast healing spell, completely avoid damage
+                        RemainingDamage = 0;
+                        
+                        uint32 defenseSkillValue = GetDefenseSkillValue();
+                        // Max heal when defense skill denies critical hits from raid bosses
+                        // Formula: max defense at level + 140 (raiting from gear)
+                        uint32 reqDefForMaxHeal  = getLevel() * 5 + 140;
+                        float pctFromDefense = (defenseSkillValue >= reqDefForMaxHeal)
+                            ? 1.0f
+                            : float(defenseSkillValue) / float(reqDefForMaxHeal);
+
+                        int32 healAmount = GetMaxHealth() * ((*i)->GetSpellProto()->EffectBasePoints[1] + 1) / 100.0f * pctFromDefense;
+                        CastSpell(this, 66233, true);
+                        CastCustomSpell(this, 66235, &healAmount, NULL, NULL, true);
+                    }
+                    else if (remainingHealth < int32(allowedHealth))
+                    {
+                        // Reduce damage that brings us under 35% (or full damage if we are already under 35%) by x%
+                        uint32 damageToReduce = (GetHealth() < allowedHealth)
+                            ? RemainingDamage
+                            : allowedHealth - remainingHealth;
+                        RemainingDamage -= damageToReduce * currentAbsorb / 100;
+                    }
                     continue;
                 }
                 break;
@@ -2689,7 +2727,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // parry & block chances
 
     // check if attack comes from behind, nobody can parry or block if attacker is behind
-    if (!pVictim->HasInArc(M_PI_F,this))
+    if (!pVictim->HasInArc(M_PI_F,this) && !pVictim->HasAura(19263))
     {
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: attack came from behind.");
     }
@@ -2845,8 +2883,8 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 void Unit::SendMeleeAttackStart(Unit* pVictim)
 {
     WorldPacket data( SMSG_ATTACKSTART, 8 + 8 );
-    data << uint64(GetGUID());
-    data << uint64(pVictim->GetGUID());
+    data << GetObjectGuid();
+    data << pVictim->GetObjectGuid();
 
     SendMessageToSet(&data, true);
     DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
@@ -2984,23 +3022,13 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     bool canDodge = true;
     bool canParry = true;
 
-    // Same spells cannot be parry/dodge
+    // Some spells cannot be parry/dodge
     if (spell->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
         return SPELL_MISS_NONE;
 
-    // Ranged attack cannot be parry/dodge only deflect
+    // Ranged attack cannot be parry/dodge only miss
     if (attType == RANGED_ATTACK)
-    {
-        // only if in front
-        if (pVictim->HasInArc(M_PI_F,this))
-        {
-            int32 deflect_chance = pVictim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS)*100;
-            tmp+=deflect_chance;
-            if (roll < tmp)
-                return SPELL_MISS_DEFLECT;
-        }
         return SPELL_MISS_NONE;
-    }
 
     // Check for attack from behind
     if (!pVictim->HasInArc(M_PI_F,this))
@@ -3009,7 +3037,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         if (GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
             canDodge = false;
         // Can`t parry
-        canParry = false;
+        if (!pVictim->HasAura(19263))
+            canParry = false;
     }
     // Check creatures flags_extra for disable parry
     if(pVictim->GetTypeId()==TYPEID_UNIT)
@@ -3143,14 +3172,10 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if (rand < tmp)
         return SPELL_MISS_MISS;
 
-    // cast by caster in front of victim
-    if (pVictim->HasInArc(M_PI_F,this))
-    {
-        int32 deflect_chance = pVictim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS)*100;
-        tmp+=deflect_chance;
-        if (rand < tmp)
-            return SPELL_MISS_DEFLECT;
-    }
+    int32 deflect_chance = pVictim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS)*100;
+    tmp+=deflect_chance;
+    if (rand < tmp)
+        return SPELL_MISS_DEFLECT;
 
     return SPELL_MISS_NONE;
 }
@@ -5200,11 +5225,11 @@ void Unit::SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo)
 {
     WorldPacket data(SMSG_SPELLLOGMISS, (4+8+1+4+8+1));
     data << uint32(spellID);
-    data << uint64(GetGUID());
+    data << GetObjectGuid();
     data << uint8(0);                                       // can be 0 or 1
     data << uint32(1);                                      // target count
     // for(i = 0; i < target count; ++i)
-    data << uint64(target->GetGUID());                      // target GUID
+    data << target->GetObjectGuid();                        // target GUID
     data << uint8(missInfo);
     // end loop
     SendMessageToSet(&data, true);
@@ -7756,7 +7781,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterCombat(enemy);
 
-        if (InstanceData* mapInstance = this->GetInstanceData())
+        if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEnterCombat((Creature*)this);
     }
 }
@@ -8629,7 +8654,7 @@ void Unit::TauntFadeOut(Unit *taunter)
         if(((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterEvadeMode();
 
-        if (InstanceData* mapInstance = this->GetInstanceData())
+        if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEvade((Creature*)this);
 
         return;
@@ -8728,7 +8753,7 @@ bool Unit::SelectHostileTarget()
     if(!((Creature*)this)->isVehicle())
         ((Creature*)this)->AI()->EnterEvadeMode();
 
-    if (InstanceData* mapInstance = this->GetInstanceData())
+    if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureEvade((Creature*)this);
 
     return false;
@@ -9915,7 +9940,7 @@ void Unit::SendPetTalk (uint32 pettalk)
         return;
 
     WorldPacket data(SMSG_PET_ACTION_SOUND, 8 + 4);
-    data << uint64(GetGUID());
+    data << GetObjectGuid();
     data << uint32(pettalk);
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }

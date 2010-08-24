@@ -913,7 +913,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
-                        data << uint64(unitTarget->GetGUID());
+                        data << unitTarget->GetObjectGuid();
                         ((Player*)caster)->GetSession()->SendPacket( &data );
                     }
                     return;
@@ -1990,13 +1990,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 uint32 rage = m_caster->GetPower(POWER_RAGE);
 
-                // up to max 30 rage cost
-                if (rage > 300)
-                    rage = 300;
+                if (!rage)
+                    m_caster->SetPower(POWER_RAGE, 1);
+
+                uint32 rage_addition = rage;
+
+                // up to max 30 total rage cost
+                if (rage_addition + GetPowerCost() > 300)
+                    rage_addition = 300 - GetPowerCost();
+
+                uint32 rage_modified = rage_addition;
 
                 // Glyph of Execution bonus
-                uint32 rage_modified = rage;
-
                 if (Aura *aura = m_caster->GetDummyAura(58367))
                     rage_modified +=  aura->GetModifier()->m_amount*10;
 
@@ -2005,25 +2010,26 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
 
+                uint32 new_rage = rage - rage_addition;
+
                 // Sudden Death
-                if (m_caster->HasAura(52437))
+                Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+                for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                 {
-                    Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                    for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
+                    if ((*itr)->GetSpellProto()->SpellIconID == 1989)
                     {
-                        // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
-                        if ((*itr)->GetSpellProto()->SpellIconID == 1989)
-                        {
-                            // saved rage top stored in next affect
-                            uint32 lastrage = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)*10;
-                            if(lastrage < rage)
-                                rage -= lastrage;
-                            break;
-                        }
+                        // saved rage top stored in next affect
+                        uint32 save_rage = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)*10;
+
+                        if (new_rage < save_rage)
+                            new_rage = save_rage;
+
+                        break;
                     }
                 }
 
-                m_caster->SetPower(POWER_RAGE,m_caster->GetPower(POWER_RAGE)-rage);
+                m_caster->SetPower(POWER_RAGE, new_rage);
                 return;
             }
             // Slam
@@ -2639,6 +2645,34 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
 
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
+                return;
+            }
+            // Death Grip
+            else if (m_spellInfo->Id == 49576)
+
+            {
+
+                if (!unitTarget)
+
+                    return;
+
+
+                m_caster->CastSpell(unitTarget, 49560, true);
+
+                return;
+            }
+            else if (m_spellInfo->Id == 49560)
+            {
+
+                if (!unitTarget)
+
+                   return;
+
+
+               uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+
+               unitTarget->CastSpell(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), spellId, true);
+
                 return;
             }
             break;
@@ -4396,8 +4430,8 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         {
             // Failed to dispell
             WorldPacket data(SMSG_DISPEL_FAILED, 8+8+4+4*fail_list.size());
-            data << uint64(m_caster->GetGUID());            // Caster GUID
-            data << uint64(unitTarget->GetGUID());          // Victim GUID
+            data << m_caster->GetObjectGuid();              // Caster GUID
+            data << unitTarget->GetObjectGuid();            // Victim GUID
             data << uint32(m_spellInfo->Id);                // Dispell spell id
             for (std::list< uint32 >::iterator j = fail_list.begin(); j != fail_list.end(); ++j)
                 data << uint32(*j);                         // Spell Id
@@ -7168,8 +7202,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
 
     // Send request
     WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8);
-    data << uint64(pGameObj->GetGUID());
-    data << uint64(caster->GetGUID());
+    data << pGameObj->GetObjectGuid();
+    data << caster->GetObjectGuid();
     caster->GetSession()->SendPacket(&data);
     target->GetSession()->SendPacket(&data);
 
@@ -7234,7 +7268,7 @@ void Spell::EffectSummonPlayer(SpellEffectIndex /*eff_idx*/)
     ((Player*)unitTarget)->SetSummonPoint(m_caster->GetMapId(),x,y,z);
 
     WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
-    data << uint64(m_caster->GetGUID());                    // summoner guid
+    data << m_caster->GetObjectGuid();                      // summoner guid
     data << uint32(m_caster->GetZoneId());                  // summoner zone
     data << uint32(MAX_PLAYER_SUMMON_DELAY*IN_MILLISECONDS); // auto decline after msecs
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
@@ -7365,7 +7399,7 @@ void Spell::DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc)
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         data << uint8(slot);
-        data << uint64(pTotem->GetGUID());
+        data << pTotem->GetObjectGuid();
         data << uint32(duration);
         data << uint32(m_spellInfo->Id);
         ((Player*)m_caster)->SendDirectMessage(&data);
@@ -8538,7 +8572,7 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
 
     // zone update
     data.Initialize(SMSG_PLAYERBOUND, 8+4);
-    data << uint64(player->GetGUID());
+    data << player->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage( &data );
 }
@@ -8584,7 +8618,7 @@ void Spell::EffectTeachTaxiNode( SpellEffectIndex eff_idx )
         player->SendDirectMessage( &data );
 
         data.Initialize( SMSG_TAXINODE_STATUS, 9 );
-        data << uint64( m_caster->GetGUID() );
+        data << m_caster->GetObjectGuid();
         data << uint8( 1 );
         player->SendDirectMessage( &data );
     }

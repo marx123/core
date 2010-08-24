@@ -2,9 +2,9 @@
 #define AUCTION_HOUSE_BOT_H
 
 #include "World.h"
+#include "Player.h"
 #include "Config/Config.h"
 #include "ace/Vector_T.h"
-#include "AuctionHouseMgr.h"
 
 #define AHB_GREY        0
 #define AHB_WHITE       1

@@ -627,6 +627,19 @@ bool IsPositiveEffect(uint32 spellId, SpellEffectIndex effIndex)
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
     if (!spellproto) return false;
 
+    switch(spellId)
+    {
+        case 47540:                                         // Penance start dummy aura - Rank 1
+        case 53005:                                         // Penance start dummy aura - Rank 2
+        case 53006:                                         // Penance start dummy aura - Rank 3
+        case 53007:                                         // Penance start dummy aura - Rank 4
+        case 47757:                                         // Penance heal effect trigger - Rank 1
+        case 52986:                                         // Penance heal effect trigger - Rank 2
+        case 52987:                                         // Penance heal effect trigger - Rank 3
+        case 52988:                                         // Penance heal effect trigger - Rank 4
+            return true;
+    }
+
     switch(spellproto->Effect[effIndex])
     {
         case SPELL_EFFECT_DUMMY:
@@ -2042,6 +2055,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Serpent Sting & (Immolation/Explosive Trap Effect)
                 if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x4)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x00000004000)) ||
                     (spellInfo_2->SpellFamilyFlags & UI64LIT(0x4)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x00000004000)) )
+                    return false;
+
+                // Deterrence
+                if( spellInfo_1->SpellIconID == 83 && spellInfo_2->SpellIconID == 83 )
                     return false;
 
                 // Bestial Wrath
