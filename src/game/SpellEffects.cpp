@@ -3429,7 +3429,7 @@ void Spell::EffectHealPct(SpellEffectIndex /*eff_idx*/)
 
         int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo);
         if (m_spellInfo->Id !=61607)
-			unitTarget->getHostileRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
+            unitTarget->getHostileRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
     }
 }
 

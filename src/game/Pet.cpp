@@ -205,9 +205,9 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
             SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet dismiss, cancel)
-			//death knights pet must have energy instead of mana
-			if (GetEntry() == 26125)
-				setPowerType(POWER_ENERGY);
+            //death knights pet must have energy instead of mana
+            if (GetEntry() == 26125)
+                setPowerType(POWER_ENERGY);
 
             break;
         case HUNTER_PET:
@@ -478,7 +478,7 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
 
-		// send cooldown for summon spell if necessary
+        // send cooldown for summon spell if necessary
         if (Player* p_owner = GetCharmerOrOwnerPlayerOrPlayerItself())
         {
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetUInt32Value(UNIT_CREATED_BY_SPELL));

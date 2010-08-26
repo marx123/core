@@ -5990,14 +5990,14 @@ void Unit::SetPet(Pet* pet)
     SetPetGUID(pet ? pet->GetGUID() : 0);
 
     if(pet && GetTypeId() == TYPEID_PLAYER)
-	{
+    {
         ((Player*)this)->SendPetGUIDs();
 
-		// set infinite cooldown for summon spell
+        // set infinite cooldown for summon spell
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
         if (spellInfo && spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
             ((Player*)this)->AddSpellAndCategoryCooldowns(spellInfo, 0, NULL,true);
-	}
+    }
 }
 
 void Unit::SetCharm(Unit* pet)
@@ -6009,7 +6009,7 @@ void Unit::AddGuardian( Pet* pet )
 {
     m_guardianPets.insert(pet->GetGUID());
 
-	if(GetTypeId() == TYPEID_PLAYER)
+    if(GetTypeId() == TYPEID_PLAYER)
     {
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
         if (spellInfo && spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)

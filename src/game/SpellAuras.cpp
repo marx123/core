@@ -2021,10 +2021,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 48025:                             // Headless Horseman's Mount
                         Spell::SelectMountByAreaAndSkill(target, 51621, 48024, 51617, 48023, 0);
                         return;
-					case 50141:
-					    if (Unit* caster = GetCaster())
-						    caster->CastSpell(caster, 50016, true, NULL, this);
-						return;	
+                    case 50141:
+                        if (Unit* caster = GetCaster())
+                            caster->CastSpell(caster, 50016, true, NULL, this);
+                        return;	
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
@@ -4152,7 +4152,7 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
                 if(spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
                     // Stop spells on prepare or casting state
                     target->InterruptSpell(CurrentSpellTypes(i), false);
-	}
+    }
     else
     {
         // Real remove called after current aura remove from lists, check if other similar auras active
@@ -7879,16 +7879,16 @@ void Aura::HandleAuraMirrorImage(bool Apply, bool Real)
 
 void Aura::SetAuraMaxDuration( int32 duration )
 {
-	m_maxduration = duration;
+    m_maxduration = duration;
 
-	// possible overwrite persistent state
-	if (duration > 0)
-	{
-		if (!(GetHolder()->IsPassive() && GetSpellProto()->DurationIndex == 0))
-			GetHolder()->SetPermanent(false);
+    // possible overwrite persistent state
+    if (duration > 0)
+    {
+        if (!(GetHolder()->IsPassive() && GetSpellProto()->DurationIndex == 0))
+            GetHolder()->SetPermanent(false);
 
-		GetHolder()->SetAuraFlags(GetHolder()->GetAuraFlags() | AFLAG_DURATION);
-	}
+        GetHolder()->SetAuraFlags(GetHolder()->GetAuraFlags() | AFLAG_DURATION);
+    }
 }
 
 bool Aura::IsLastAuraOnHolder()

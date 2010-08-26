@@ -1498,7 +1498,7 @@ void Player::Update( uint32 p_time )
     if (IsHasDelayedTeleport())
         TeleportTo(m_teleport_dest, m_teleport_options);
 
-	    // Playerbot mod
+        // Playerbot mod
     if (m_playerbotAI)
         m_playerbotAI->UpdateAI(p_time);
     else if (m_playerbotMgr)
@@ -5569,9 +5569,9 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     Unit *pVictim = getVictim();
     if(pVictim && pVictim->IsCharmerOrOwnerPlayerOrPlayerItself())
         return;
-		
-	if(pVictim && pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE ))
-	    return;
+        
+    if(pVictim && pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE ))
+        return;
 
     if(IsInFeralForm())
         return;                                             // always maximized SKILL_FERAL_COMBAT in fact
@@ -17815,15 +17815,15 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     if (pet && m_temporaryUnsummonedPetNumber && m_temporaryUnsummonedPetNumber != pet->GetCharmInfo()->GetPetNumber() && mode == PET_SAVE_AS_CURRENT)
         mode = PET_SAVE_NOT_IN_SLOT;
 
-	if(mode != PET_SAVE_AS_CURRENT  && !InBattleGround())
+    if(mode != PET_SAVE_AS_CURRENT  && !InBattleGround())
     {
         //returning of reagents only for players, so best done here
-		uint32 spellId = pet ? pet->GetUInt32Value(UNIT_CREATED_BY_SPELL) : m_oldpetspell;      // this is nonsense, pet will always be != NULL here
+        uint32 spellId = pet ? pet->GetUInt32Value(UNIT_CREATED_BY_SPELL) : m_oldpetspell;      // this is nonsense, pet will always be != NULL here
 
-		if(SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId))
+        if(SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId))
         {
-			// returning of reagents
-			if (returnreagent)
+            // returning of reagents
+            if (returnreagent)
             {
                 for(uint32 i = 0; i < 7; ++i)
                 {
@@ -17840,7 +17840,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
                     }
                 }
             }
-			// cooldown, only if pet is not death already (corpse)
+            // cooldown, only if pet is not death already (corpse)
             if (spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE && pet->getDeathState() != CORPSE)
             {
                 SendCooldownEvent(spellInfo);
