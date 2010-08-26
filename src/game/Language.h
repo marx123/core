@@ -905,8 +905,6 @@ enum MangosStrings
     //                                    10000-10999
 
     // Use for custom patches             11000-11999
-    // Broadcaster
-    LANG_AUTO_BROADCAST                 = 11000,
     // Spell_disable
     LANG_DISABLE_SPELL                  = 11001,
     LANG_ENABLE_SPELL                   = 11002,
