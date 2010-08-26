@@ -2412,6 +2412,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
         void SetBotDeathTimer() { m_deathTimer = 0; }
 
+		uint32 m_grid_update_timer;
     protected:
 
         uint32 m_contestedPvPTimer;

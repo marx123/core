@@ -636,6 +636,9 @@ void Vehicle::Dismiss()
 
 void Vehicle::RellocatePassengers(Map *map)
 {
+	if (m_Seats.empty())
+       return;
+
     for(SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
         if(itr->second.flags & SEAT_FULL)

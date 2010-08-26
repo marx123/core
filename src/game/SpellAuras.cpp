@@ -2014,6 +2014,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             // not use ammo and not allow use
                             ((Player*)target)->RemoveAmmo();
                         return;
+					case 47977:                             // Magic Broom
+                       Spell::SelectMountByAreaAndSkill(target, 42680, 42683, 42667, 42668, 0);
+                        return;
                     case 47190:                             // Toalu'u's Spiritual Incense
                         target->CastSpell(target, 47189, true, NULL, this);
                         // allow script to process further (text)
@@ -2510,6 +2513,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
         case SPELLFAMILY_PRIEST:
         {
+            // Penance
+           if (GetSpellProto()->SpellIconID == 225 || GetSpellProto()->SpellIconID == 2818)
+           {
+               Unit* caster = GetCaster();
+               if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                   return;
+
+               if (apply && target)
+                   ((Player*)caster)->SetSelection(target->GetGUID());
+               return;
+           }
             // Pain and Suffering
             if (GetSpellProto()->SpellIconID == 2874 && target->GetTypeId()==TYPEID_PLAYER)
             {
@@ -6474,13 +6488,15 @@ void Aura::PeriodicTick()
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!target->isAlive())
+            if (!target->IsInWorld() ||  !target->isAlive())
                 return;
 
             Unit *pCaster = GetCaster();
             if(!pCaster)
                 return;
 
+			if(!pCaster->IsInWorld() || !pCaster->isAlive())
+				return; 
             if( spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 pCaster->SpellHitResult(target, spellProto, false) != SPELL_MISS_NONE)
                 return;
@@ -9081,7 +9097,7 @@ void SpellAuraHolder::UnregisterSingleCastHolder()
         else
         {
             sLog.outError("Couldn't find the caster of the single target aura (SpellId %u), may crash later!", GetId());
-            ASSERT(false);
+            //ASSERT(false);
         }
         m_isSingleTarget = false;
     }
