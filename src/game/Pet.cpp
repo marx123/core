@@ -481,8 +481,9 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
 		// send cooldown for summon spell if necessary
         if (Player* p_owner = GetCharmerOrOwnerPlayerOrPlayerItself())
         {
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetUInt32Value(UNIT_CREATED_BY_SPELL));
-            if (spellInfo && spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(GetUInt32Value(UNIT_CREATED_BY_SPELL));
+            if (!spellInfo) return;            
+			if (spellInfo && spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
                 p_owner->SendCooldownEvent(spellInfo);
             // Raise Dead hack
             if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->SpellFamilyFlags & 0x1000)

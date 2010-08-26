@@ -326,11 +326,15 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     /* process position-change */
     movementInfo.UpdateTime(getMSTime());
-
-    WorldPacket data(opcode, recv_data.size());
-    data.appendPackGUID(mover->GetGUID());                  // write guid
-    movementInfo.Write(data);                               // write data
-    mover->SendMessageToSetExcept(&data, _player);
+	if(mover->IsInWorld())
+	{
+		WorldPacket data(opcode, recv_data.size());
+		data.appendPackGUID(mover->GetGUID());                  // write guid
+		movementInfo.Write(data);                               // write data
+		mover->SendMessageToSetExcept(&data, _player);
+    }
+   else
+       error_log("mover not in world");
 
     mover->m_movementInfo = movementInfo;
     mover->SetPosition(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o);
