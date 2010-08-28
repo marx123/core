@@ -2649,31 +2649,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             }
             // Death Grip
             else if (m_spellInfo->Id == 49576)
-
-            {
-
-                if (!unitTarget)
-
-                    return;
-
-
-                m_caster->CastSpell(unitTarget, 49560, true);
-
-                return;
+			{
+				if (!unitTarget)
+					return;
+				
+				m_caster->CastSpell(unitTarget, 49560, true);
+					return;
             }
             else if (m_spellInfo->Id == 49560)
             {
-
                 if (!unitTarget)
-
-                   return;
-
-
-               uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
-
-               unitTarget->CastSpell(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), spellId, true);
-
-                return;
+					return;
+				
+				uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+				
+				unitTarget->CastSpell(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), spellId, true);
+					return;
             }
             break;
         }
@@ -2920,6 +2911,11 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
 
     m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, spellInfo, true, m_CastItem, 0, m_originalCasterGUID);
+
+	// Fix Freezing Arrow
+	if (m_caster->GetTypeId() == TYPEID_PLAYER)
+		((Player*)m_caster)->RemoveSpellCooldown(triggered_spell_id);
+	m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, spellInfo, true, m_CastItem, 0, m_originalCasterGUID);
 }
 
 void Spell::EffectJump(SpellEffectIndex eff_idx)
@@ -5800,8 +5796,7 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
 
 void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 {
-    // TODO: we must implement hunter pet summon at login there (spell 6962)
-
+    // TODO: we must implement hunter pet summon at login there (spell 6962
     switch(m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
